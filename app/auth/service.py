@@ -24,7 +24,11 @@ async def register_user(db: AsyncSession, user_in: UserCreate):
     stmt = select(User).where(User.email == user_in.email)
     result = await db.execute(stmt)
     if result.scalar_one_or_none():
-        logger.warning("register_user_failed", reason="email_already_registered", email=user_in.email)
+        logger.warning(
+            "register_user_failed",
+            reason="email_already_registered",
+            email=user_in.email,
+        )
         raise HTTPException(status_code=400, detail="Email already registered")
 
     new_user = User(
@@ -56,7 +60,9 @@ async def login_user(db: AsyncSession, user_in: UserLogin):
     user = result.scalar_one_or_none()
 
     if not user or not verify_password(user_in.password, str(user.password_hash)):
-        logger.warning("login_user_failed", reason="incorrect_credentials", email=user_in.email)
+        logger.warning(
+            "login_user_failed", reason="incorrect_credentials", email=user_in.email
+        )
         raise HTTPException(status_code=401, detail="Incorrect email or password")
 
     access_token = create_access_token(data={"sub": str(user.id)})
@@ -96,7 +102,9 @@ async def refresh_user_token(refresh_token: str):
             f"refresh_token:{user_id}:{refresh_token}"
         )
         if not is_valid:
-            logger.warning("refresh_token_failed", reason="revoked_or_expired", user_id=user_id)
+            logger.warning(
+                "refresh_token_failed", reason="revoked_or_expired", user_id=user_id
+            )
             raise HTTPException(
                 status_code=401, detail="Refresh token revoked or expired"
             )
