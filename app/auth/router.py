@@ -16,7 +16,7 @@ from app.auth.schemas import (
 from app.auth import service
 from app.auth.dependencies import get_current_user, oauth2_scheme
 
-router = APIRouter(prefix="/auth", tags=["auth"])
+router = APIRouter(prefix="/auth", tags=["Auth"])
 
 
 @router.post(
