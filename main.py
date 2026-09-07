@@ -4,7 +4,10 @@ from scalar_fastapi import get_scalar_api_reference
 
 from app.core.redis import redis_client
 from app.auth.router import router as auth_router
+from app.core.logger import setup_logging
+from app.core.middleware import LoggingMiddleware
 
+setup_logging(pretty=False)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -14,6 +17,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan, docs_url=None)
+app.add_middleware(LoggingMiddleware)
 
 app.include_router(auth_router)
 

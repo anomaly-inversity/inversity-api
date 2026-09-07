@@ -2,15 +2,15 @@ import logging
 import sys
 import structlog
 
-def setup_logging(pretty: bool = True):
+def setup_logging(pretty: bool = False):
     processors = [
+        structlog.contextvars.merge_contextvars,
         structlog.stdlib.add_log_level,
         structlog.stdlib.add_logger_name,
         structlog.processors.TimeStamper(fmt="iso"),
         structlog.processors.dict_tracebacks,
     ]
 
-    # Render JSON. Pakai indent=2 agar pretty.
     if pretty:
         processors.append(structlog.processors.JSONRenderer(indent=2))
     else:
@@ -23,9 +23,12 @@ def setup_logging(pretty: bool = True):
         cache_logger_on_first_use=True,
     )
 
-    # Konfigurasi standard logging root
     handler = logging.StreamHandler(sys.stdout)
     root_logger = logging.getLogger()
+
+    if root_logger.hasHandlers():
+        root_logger.handlers.clear()
+
     root_logger.addHandler(handler)
     root_logger.setLevel(logging.INFO)
 
