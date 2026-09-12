@@ -70,7 +70,8 @@ class Workspace(Base):
     name: Mapped[str] = mapped_column(String, nullable=False)
     invite_code: Mapped[Optional[str]] = mapped_column(String, unique=True, index=True)
     created_by: Mapped[Optional[uuid.UUID]] = mapped_column(
-        Uuid, ForeignKey("users.id")
+        Uuid,
+        ForeignKey("users.id", ondelete="set null"),
     )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
@@ -86,10 +87,10 @@ class WorkspaceUser(Base):
         Uuid, primary_key=True, index=True, default=lambda: str(uuid.uuid4())
     )
     workspace_id: Mapped[uuid.UUID] = mapped_column(
-        Uuid, ForeignKey("workspaces.id"), nullable=False
+        Uuid, ForeignKey("workspaces.id", ondelete="cascade"), nullable=False
     )
     user_id: Mapped[uuid.UUID] = mapped_column(
-        Uuid, ForeignKey("users.id"), nullable=False
+        Uuid, ForeignKey("users.id", ondelete="cascade"), nullable=False
     )
     role: Mapped[RoleEnum] = mapped_column(
         Enum(RoleEnum), default=RoleEnum.USER, nullable=False
@@ -109,10 +110,10 @@ class Document(Base):
         Uuid, primary_key=True, index=True, default=lambda: str(uuid.uuid4())
     )
     workspace_id: Mapped[uuid.UUID] = mapped_column(
-        Uuid, ForeignKey("workspaces.id"), nullable=False
+        Uuid, ForeignKey("workspaces.id", ondelete="cascade"), nullable=False
     )
     user_id: Mapped[uuid.UUID] = mapped_column(
-        Uuid, ForeignKey("users.id"), nullable=False
+        Uuid, ForeignKey("users.id", ondelete="cascade"), nullable=False
     )
     title: Mapped[str] = mapped_column(String, nullable=False)
     status: Mapped[DocumentStatusEnum] = mapped_column(
@@ -136,10 +137,10 @@ class DocumentReviewer(Base):
         Integer, primary_key=True, nullable=False, autoincrement=True
     )
     document_id: Mapped[uuid.UUID] = mapped_column(
-        Uuid, ForeignKey("documents.id"), nullable=False
+        Uuid, ForeignKey("documents.id", ondelete="cascade"), nullable=False
     )
     reviewer_id: Mapped[uuid.UUID] = mapped_column(
-        Uuid, ForeignKey("users.id"), nullable=False
+        Uuid, ForeignKey("users.id", ondelete="cascade"), nullable=False
     )
     is_mentor: Mapped[bool] = mapped_column(Boolean, default=False)
 
@@ -154,7 +155,7 @@ class DocumentVersion(Base):
         Uuid, primary_key=True, index=True, default=lambda: str(uuid.uuid4())
     )
     document_id: Mapped[uuid.UUID] = mapped_column(
-        Uuid, ForeignKey("documents.id"), nullable=False
+        Uuid, ForeignKey("documents.id", ondelete="cascade"), nullable=False
     )
     file_path: Mapped[str] = mapped_column(String, nullable=False)
     ai_summary: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
@@ -179,10 +180,10 @@ class ReviewRequest(Base):
         Uuid, primary_key=True, index=True, default=lambda: str(uuid.uuid4())
     )
     document_id: Mapped[uuid.UUID] = mapped_column(
-        Uuid, ForeignKey("documents.id"), nullable=False
+        Uuid, ForeignKey("documents.id", ondelete="cascade"), nullable=False
     )
     reviewer_id: Mapped[uuid.UUID] = mapped_column(
-        Uuid, ForeignKey("users.id"), nullable=False
+        Uuid, ForeignKey("users.id", ondelete="cascade"), nullable=False
     )
     status: Mapped[ReviewStatusEnum] = mapped_column(
         Enum(ReviewStatusEnum), default=ReviewStatusEnum.PENDING, nullable=False
@@ -202,10 +203,10 @@ class Revision(Base):
         Uuid, primary_key=True, index=True, default=lambda: str(uuid.uuid4())
     )
     document_version_id: Mapped[uuid.UUID] = mapped_column(
-        Uuid, ForeignKey("document_versions.id"), nullable=False
+        Uuid, ForeignKey("document_versions.id", ondelete="cascade"), nullable=False
     )
     reviewer_id: Mapped[uuid.UUID] = mapped_column(
-        Uuid, ForeignKey("users.id"), nullable=False
+        Uuid, ForeignKey("users.id", ondelete="set null"), nullable=False
     )
     note: Mapped[str] = mapped_column(Text, nullable=False)
     status: Mapped[RevisionStatusEnum] = mapped_column(
@@ -213,6 +214,9 @@ class Revision(Base):
     )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
+    )
+    deleted_at: Mapped[Optional[datetime]] = mapped_column(
+        DateTime(timezone=True), nullable=True, default=None
     )
 
     document_version: Mapped["DocumentVersion"] = relationship("DocumentVersion")
@@ -226,10 +230,10 @@ class ChatSession(Base):
         Uuid, primary_key=True, index=True, default=lambda: str(uuid.uuid4())
     )
     document_id: Mapped[uuid.UUID] = mapped_column(
-        Uuid, ForeignKey("documents.id"), nullable=False
+        Uuid, ForeignKey("documents.id", ondelete="cascade"), nullable=False
     )
     user_id: Mapped[uuid.UUID] = mapped_column(
-        Uuid, ForeignKey("users.id"), nullable=False
+        Uuid, ForeignKey("users.id", ondelete="cascade"), nullable=False
     )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
@@ -246,7 +250,7 @@ class ChatMessage(Base):
         Integer, primary_key=True, index=True, autoincrement=True
     )
     session_id: Mapped[uuid.UUID] = mapped_column(
-        Uuid, ForeignKey("chat_sessions.id"), nullable=False
+        Uuid, ForeignKey("chat_sessions.id", ondelete="cascade"), nullable=False
     )
     sender_type: Mapped[SenderTypeEnum] = mapped_column(
         Enum(SenderTypeEnum), nullable=False
