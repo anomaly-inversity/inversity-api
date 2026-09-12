@@ -97,9 +97,6 @@ class Document(Base):
     user_id: Mapped[uuid.UUID] = mapped_column(
         Uuid, ForeignKey("users.id"), nullable=False
     )
-    assigned_reviewer_id: Mapped[Optional[uuid.UUID]] = mapped_column(
-        Uuid, ForeignKey("users.id"), nullable=True
-    )
     title: Mapped[str] = mapped_column(String, nullable=False)
     status: Mapped[str] = mapped_column(String, nullable=False)
     created_at: Mapped[datetime] = mapped_column(
@@ -108,12 +105,27 @@ class Document(Base):
 
     workspace: Mapped["Workspace"] = relationship("Workspace")
     uploader: Mapped["User"] = relationship("User", foreign_keys=[user_id])
-    reviewer: Mapped[Optional["User"]] = relationship(
-        "User", foreign_keys=[assigned_reviewer_id]
-    )
     versions: Mapped[List["DocumentVersion"]] = relationship(
         "DocumentVersion", back_populates="document"
     )
+
+
+class DocumentReviewer(Base):
+    __tablename__ = "document_reviewers"
+
+    id: Mapped[int] = mapped_column(
+        Integer, primary_key=True, nullable=False, autoincrement=True
+    )
+    document_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, ForeignKey("documents.id"), nullable=False
+    )
+    reviewer_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, ForeignKey("users.id"), nullable=False
+    )
+    label: Mapped[str] = mapped_column(String, default="Accessor")
+
+    document: Mapped["Document"] = relationship("Document")
+    reviewer: Mapped["User"] = relationship("User", foreign_keys=[reviewer_id])
 
 
 class DocumentVersion(Base):
