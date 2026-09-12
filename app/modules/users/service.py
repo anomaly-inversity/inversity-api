@@ -25,7 +25,7 @@ def _to_response(user: User, membership: WorkspaceUser) -> UserWorkspaceResponse
 
 
 async def list_workspace_users(
-    db: AsyncSession, workspace_id: int, skip: int = 0, limit: int = 100
+    db: AsyncSession, workspace_id: str, skip: int = 0, limit: int = 100
 ) -> tuple[list[UserWorkspaceResponse], int]:
     """List semua user yang terdaftar pada satu workspace."""
     count_stmt = (
@@ -49,7 +49,7 @@ async def list_workspace_users(
 
 
 async def get_workspace_user_detail(
-    db: AsyncSession, workspace_id: int, user_id: int
+    db: AsyncSession, workspace_id: str, user_id: str
 ) -> UserWorkspaceResponse:
     """Detail satu user dalam workspace. 404 jika bukan member workspace itu."""
     stmt = (
@@ -72,7 +72,7 @@ async def get_workspace_user_detail(
 
 
 async def create_workspace_user(
-    db: AsyncSession, workspace_id: int, payload: UserCreateByAdmin
+    db: AsyncSession, workspace_id: str, payload: UserCreateByAdmin
 ) -> UserWorkspaceResponse:
     """Admin mendaftarkan user baru langsung ke workspace-nya."""
     logger.info(
@@ -109,7 +109,7 @@ async def create_workspace_user(
 
 
 async def update_workspace_user(
-    db: AsyncSession, workspace_id: int, user_id: int, payload: UserUpdateByAdmin
+    db: AsyncSession, workspace_id: str, user_id: int, payload: UserUpdateByAdmin
 ) -> UserWorkspaceResponse:
     """Admin update name/email/password (tabel users) dan role (tabel workspace_users)."""
     stmt = (
@@ -157,7 +157,7 @@ async def update_workspace_user(
 
 
 async def delete_workspace_user(
-    db: AsyncSession, workspace_id: int, user_id: str, current_user_id: str
+    db: AsyncSession, workspace_id: str, user_id: str, current_user_id: str
 ) -> None:
     """Remove membership: hapus baris workspace_users, data users tetap ada."""
     if user_id == current_user_id:
@@ -186,7 +186,7 @@ async def delete_workspace_user(
     logger.info("admin_delete_user_success", user_id=user_id, workspace_id=workspace_id)
 
 
-async def _ensure_not_last_admin(db: AsyncSession, workspace_id: int) -> None:
+async def _ensure_not_last_admin(db: AsyncSession, workspace_id: str) -> None:
     count_stmt = (
         select(func.count())
         .select_from(WorkspaceUser)

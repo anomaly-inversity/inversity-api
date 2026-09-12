@@ -13,12 +13,12 @@ from app.modules.users.schemas import (
     UserWorkspaceResponse,
 )
 
-router = APIRouter(prefix="/users", tags=["Users"])
+router = APIRouter(prefix="/workspaces/{workspace_id}/users", tags=["Users"])
 
 
 @router.get("", response_model=UserListResponse)
 async def list_users(
-    workspace_id: int = Query(gt=0),
+    workspace_id: str,
     skip: int = Query(default=0, ge=0),
     limit: int = Query(default=100, ge=1, le=500),
     db: AsyncSession = Depends(get_db),
@@ -31,8 +31,8 @@ async def list_users(
 
 @router.get("/{user_id}", response_model=UserWorkspaceResponse)
 async def get_user_detail(
-    user_id: int,
-    workspace_id: int = Query(gt=0),
+    user_id: str,
+    workspace_id: str,
     db: AsyncSession = Depends(get_db),
     _workspace: Workspace = Depends(require_workspace_admin),
 ) -> UserWorkspaceResponse:
@@ -45,7 +45,7 @@ async def get_user_detail(
 )
 async def create_user(
     payload: UserCreateByAdmin,
-    workspace_id: int = Query(gt=0),
+    workspace_id: str,
     db: AsyncSession = Depends(get_db),
     _workspace: Workspace = Depends(require_workspace_admin),
 ) -> UserWorkspaceResponse:
@@ -57,7 +57,7 @@ async def create_user(
 async def update_user(
     user_id: int,
     payload: UserUpdateByAdmin,
-    workspace_id: int = Query(gt=0),
+    workspace_id: str,
     db: AsyncSession = Depends(get_db),
     _workspace: Workspace = Depends(require_workspace_admin),
 ) -> UserWorkspaceResponse:
@@ -68,7 +68,7 @@ async def update_user(
 @router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_user(
     user_id: str,
-    workspace_id: int = Query(gt=0),
+    workspace_id: str,
     db: AsyncSession = Depends(get_db),
     _workspace: Workspace = Depends(require_workspace_admin),
     current_user: User = Depends(get_current_user),
