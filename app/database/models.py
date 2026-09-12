@@ -40,6 +40,13 @@ class SenderTypeEnum(str, enum.Enum):
     AI = "ai"
 
 
+class DocumentStatusEnum(str, enum.Enum):
+    PENDING = "pending"
+    REVISE = "revise"
+    REJECTED = "rejected"
+    ACCEPTED = "accepted"
+
+
 class User(Base):
     __tablename__ = "users"
 
@@ -108,7 +115,9 @@ class Document(Base):
         Uuid, ForeignKey("users.id"), nullable=False
     )
     title: Mapped[str] = mapped_column(String, nullable=False)
-    status: Mapped[str] = mapped_column(String, nullable=False)
+    status: Mapped[DocumentStatusEnum] = mapped_column(
+        Enum(DocumentStatusEnum), default=DocumentStatusEnum.PENDING, nullable=False
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )
@@ -147,10 +156,12 @@ class DocumentVersion(Base):
     document_id: Mapped[uuid.UUID] = mapped_column(
         Uuid, ForeignKey("documents.id"), nullable=False
     )
-    file_url: Mapped[str] = mapped_column(String, nullable=False)
-    version_number: Mapped[int] = mapped_column(nullable=False)
+    file_path: Mapped[str] = mapped_column(String, nullable=False)
     ai_summary: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     ai_detection_score: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+    status: Mapped[DocumentStatusEnum] = mapped_column(
+        Enum(DocumentStatusEnum), default=DocumentStatusEnum.PENDING, nullable=False
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )
