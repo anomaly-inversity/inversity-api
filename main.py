@@ -9,6 +9,8 @@ from app.core import logger
 from app.core.redis import redis_client
 from app.database.session import Base, engine
 from app.modules.auth.router import router as auth_router
+from app.modules.documents.router import router as documents_router
+from app.modules.review_requests.router import router as review_requests_router
 from app.modules.users.router import router as users_router
 from app.modules.workspaces.router import router as workspaces_router
 from app.core.logger import setup_logging
@@ -29,8 +31,10 @@ app = FastAPI(lifespan=lifespan, docs_url=None)
 app.add_middleware(LoggingMiddleware)
 
 app.include_router(auth_router)
-app.include_router(users_router)
 app.include_router(workspaces_router)
+app.include_router(users_router)
+app.include_router(documents_router)
+app.include_router(review_requests_router)
 
 
 @app.get("/docs", include_in_schema=False)

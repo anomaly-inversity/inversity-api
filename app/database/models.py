@@ -2,7 +2,17 @@ import enum
 import uuid
 from datetime import datetime
 from typing import List, Optional
-from sqlalchemy import Integer, String, ForeignKey, DateTime, Float, Text, Enum, Uuid
+from sqlalchemy import (
+    Boolean,
+    Integer,
+    String,
+    ForeignKey,
+    DateTime,
+    Float,
+    Text,
+    Enum,
+    Uuid,
+)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
 from app.database.session import Base
@@ -122,7 +132,7 @@ class DocumentReviewer(Base):
     reviewer_id: Mapped[uuid.UUID] = mapped_column(
         Uuid, ForeignKey("users.id"), nullable=False
     )
-    label: Mapped[str] = mapped_column(String, default="Accessor")
+    is_mentor: Mapped[bool] = mapped_column(Boolean, default=False)
 
     document: Mapped["Document"] = relationship("Document")
     reviewer: Mapped["User"] = relationship("User", foreign_keys=[reviewer_id])
