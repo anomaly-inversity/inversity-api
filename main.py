@@ -11,6 +11,8 @@ from app.database.session import Base, engine
 from app.modules.auth.router import router as auth_router
 from app.modules.document_versions.router import router as document_versions_router
 from app.modules.documents.router import router as documents_router
+from app.modules.revisions.router import document_router as revisions_document_router
+from app.modules.revisions.router import router as revisions_router
 from app.modules.review_requests.router import router as review_requests_router
 from app.modules.users.router import router as users_router
 from app.modules.workspaces.router import router as workspaces_router
@@ -36,6 +38,8 @@ app.include_router(workspaces_router)
 app.include_router(users_router)
 app.include_router(documents_router)
 app.include_router(document_versions_router)
+app.include_router(revisions_router)
+app.include_router(revisions_document_router)
 app.include_router(review_requests_router)
 
 

@@ -14,6 +14,7 @@ from app.modules.documents.dependencies import (
     require_document,
     require_document_owner,
 )
+from app.modules.workspaces.dependencies import require_workspace_admin
 
 router = APIRouter(
     prefix="/workspaces/{workspace_id}/documents/{document_id}/versions",
@@ -94,3 +95,37 @@ async def delete_version(
     )
     await service.delete_version(db, version)
     return None
+
+
+@router.post("/{version_id}/accept", response_model=DocumentVersionResponse)
+async def accept_version(
+    workspace_id: str,
+    document_id: str,
+    version_id: str,
+    db: AsyncSession = Depends(get_db),
+    doc_payload: tuple[Document, Workspace, WorkspaceUser] = Depends(require_document),
+    _admin: tuple[Workspace, WorkspaceUser] = Depends(require_workspace_admin),
+) -> DocumentVersionResponse:
+    """Admin accept version. Version + document menjadi ACCEPTED."""
+    document, _, _ = doc_payload
+    version: DocumentVersion = await service.get_version(
+        db, str(document.id), version_id
+    )
+    return await service.accept_version(db, document, version)
+
+
+@router.post("/{version_id}/reject", response_model=DocumentVersionResponse)
+async def reject_version(
+    workspace_id: str,
+    document_id: str,
+    version_id: str,
+    db: AsyncSession = Depends(get_db),
+    doc_payload: tuple[Document, Workspace, WorkspaceUser] = Depends(require_document),
+    _admin: tuple[Workspace, WorkspaceUser] = Depends(require_workspace_admin),
+) -> DocumentVersionResponse:
+    """Admin reject version. Version + document menjadi REJECTED."""
+    document, _, _ = doc_payload
+    version: DocumentVersion = await service.get_version(
+        db, str(document.id), version_id
+    )
+    return await service.reject_version(db, document, version)

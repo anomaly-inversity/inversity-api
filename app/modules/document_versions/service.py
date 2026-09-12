@@ -5,7 +5,7 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 import structlog
 
-from app.database.models import Document, DocumentVersion
+from app.database.models import Document, DocumentStatusEnum, DocumentVersion
 from app.modules.document_versions.schemas import (
     DocumentVersionCreate,
     DocumentVersionResponse,
@@ -104,3 +104,27 @@ async def delete_version(db: AsyncSession, version: DocumentVersion) -> None:
     version.deleted_at = datetime.now(timezone.utc)
     await db.commit()
     logger.info("delete_version_success", version_id=version.id)
+
+
+async def accept_version(
+    db: AsyncSession, document: Document, version: DocumentVersion
+) -> DocumentVersionResponse:
+    """Admin accept version. Version + document menjadi ACCEPTED."""
+    version.status = DocumentStatusEnum.ACCEPTED
+    document.status = DocumentStatusEnum.ACCEPTED
+    await db.commit()
+    await db.refresh(version)
+    logger.info("accept_version_success", version_id=version.id)
+    return _to_response(version)
+
+
+async def reject_version(
+    db: AsyncSession, document: Document, version: DocumentVersion
+) -> DocumentVersionResponse:
+    """Admin reject version. Version + document menjadi REJECTED."""
+    version.status = DocumentStatusEnum.REJECTED
+    document.status = DocumentStatusEnum.REJECTED
+    await db.commit()
+    await db.refresh(version)
+    logger.info("reject_version_success", version_id=version.id)
+    return _to_response(version)
