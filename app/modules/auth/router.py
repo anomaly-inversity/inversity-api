@@ -4,7 +4,7 @@ from typing import Optional
 
 from app.database.session import get_db
 from app.database.models import User
-from app.auth.schemas import (
+from app.modules.auth.schemas import (
     UserCreate,
     UserLogin,
     Token,
@@ -13,8 +13,8 @@ from app.auth.schemas import (
     ResetPasswordRequest,
     UserResponse,
 )
-from app.auth import service
-from app.auth.dependencies import get_current_user, oauth2_scheme
+from app.modules.auth import service
+from app.modules.auth.dependencies import get_current_user, oauth2_scheme
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
 

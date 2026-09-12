@@ -6,8 +6,8 @@ import jwt
 import structlog
 
 from app.database.models import User, Workspace, WorkspaceUser, RoleEnum
-from app.auth.schemas import UserCreate, UserLogin
-from app.auth.utils import (
+from app.modules.auth.schemas import UserCreate, UserLogin
+from app.modules.auth.utils import (
     get_password_hash,
     verify_password,
     create_access_token,
