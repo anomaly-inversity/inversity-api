@@ -1,4 +1,5 @@
 from datetime import datetime
+import uuid
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -22,7 +23,7 @@ class WorkspaceResponse(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
-    id: str
+    id: str | uuid.UUID
     name: str
     invite_code: str | None = None
     created_by: str | None = None

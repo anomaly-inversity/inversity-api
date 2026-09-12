@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+import uuid
 
 from fastapi import HTTPException, status
 from sqlalchemy import func, select
@@ -73,7 +74,7 @@ async def list_versions(
 
 
 async def get_version(
-    db: AsyncSession, document_id: str, version_id: str
+    db: AsyncSession, document_id: str, version_id: str | uuid.UUID
 ) -> DocumentVersion:
     """Detail satu versi aktif. 404 jika tidak milik document ini atau sudah di-soft-delete."""
     stmt = select(DocumentVersion).where(

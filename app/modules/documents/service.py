@@ -1,3 +1,4 @@
+import uuid
 from fastapi import HTTPException, status
 from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -6,6 +7,7 @@ import structlog
 from app.database.models import (
     Document,
     DocumentReviewer,
+    DocumentStatusEnum,
     ReviewRequest,
     ReviewStatusEnum,
     WorkspaceUser,
@@ -45,13 +47,13 @@ def _to_reviewer_response(reviewer: DocumentReviewer) -> DocumentReviewerRespons
 async def create_document(
     db: AsyncSession, workspace_id: str, user_id: str, payload: DocumentCreate
 ) -> DocumentResponse:
-    """Buat document baru. Owner = current_user, status awal draft."""
+    """Buat document baru. Owner = current_user, status awal pending."""
     logger.info("create_document_attempt", user_id=user_id, workspace_id=workspace_id)
     document = Document(
         workspace_id=workspace_id,
         user_id=user_id,
         title=payload.title,
-        status="draft",
+        status=DocumentStatusEnum.PENDING,
     )
     db.add(document)
     await db.commit()
@@ -145,8 +147,6 @@ async def update_document(
     """Update title/status. Caller (router) sudah memastikan owner."""
     if payload.title is not None:
         document.title = payload.title
-    if payload.status is not None:
-        document.status = payload.status
     await db.commit()
     await db.refresh(document)
     logger.info("update_document_success", document_id=document.id)
@@ -180,7 +180,7 @@ async def delete_document(db: AsyncSession, document: Document) -> None:
 
 
 async def list_reviewers(
-    db: AsyncSession, document_id: str
+    db: AsyncSession, document_id: str | uuid.UUID
 ) -> tuple[list[DocumentReviewerResponse], int]:
     """List reviewer/pembimbing sebuah document."""
     count_stmt = (

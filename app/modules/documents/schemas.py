@@ -1,4 +1,5 @@
 from datetime import datetime
+import uuid
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -21,9 +22,9 @@ class DocumentResponse(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
-    id: str
-    workspace_id: str
-    user_id: str
+    id: str | uuid.UUID
+    workspace_id: str | uuid.UUID
+    user_id: str | uuid.UUID
     title: str
     status: str
     created_at: datetime | None = None
@@ -41,13 +42,13 @@ class NeedReviewItem(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
-    id: str
-    workspace_id: str
-    user_id: str
+    id: str | uuid.UUID
+    workspace_id: str | uuid.UUID
+    user_id: str | uuid.UUID
     title: str
     status: str
     created_at: datetime | None = None
-    review_request_id: str
+    review_request_id: str | uuid.UUID
     review_requested_at: datetime | None = None
 
 
@@ -69,8 +70,8 @@ class DocumentReviewerResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
-    document_id: str
-    reviewer_id: str
+    document_id: str | uuid.UUID
+    reviewer_id: str | uuid.UUID
     is_mentor: bool
 
 

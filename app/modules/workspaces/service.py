@@ -1,4 +1,5 @@
 import secrets
+import uuid
 
 from fastapi import HTTPException, status
 from sqlalchemy import delete, func, select
@@ -89,7 +90,7 @@ async def list_user_workspaces(
 
 
 async def get_workspace_detail(
-    db: AsyncSession, workspace_id: int, user_id: str
+    db: AsyncSession, workspace_id: int, user_id: str | uuid.UUID
 ) -> WorkspaceResponse:
     """Detail satu workspace. 404 jika workspace tidak ada atau user bukan member."""
     stmt = (

@@ -1,3 +1,4 @@
+import uuid
 from fastapi import HTTPException, status
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -49,7 +50,7 @@ async def list_workspace_users(
 
 
 async def get_workspace_user_detail(
-    db: AsyncSession, workspace_id: str, user_id: str
+    db: AsyncSession, workspace_id: str, user_id: str | uuid.UUID
 ) -> UserWorkspaceResponse:
     """Detail satu user dalam workspace. 404 jika bukan member workspace itu."""
     stmt = (
@@ -157,7 +158,7 @@ async def update_workspace_user(
 
 
 async def delete_workspace_user(
-    db: AsyncSession, workspace_id: str, user_id: str, current_user_id: str
+    db: AsyncSession, workspace_id: str, user_id: str, current_user_id: str | uuid.UUID
 ) -> None:
     """Remove membership: hapus baris workspace_users, data users tetap ada."""
     if user_id == current_user_id:

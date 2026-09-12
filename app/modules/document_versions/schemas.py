@@ -20,8 +20,8 @@ class DocumentVersionResponse(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
-    id: str
-    document_id: str
+    id: str | uuid.UUID
+    document_id: str | uuid.UUID
     file_path: str
     ai_summary: str | None = None
     ai_detection_score: float | None = None

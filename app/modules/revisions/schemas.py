@@ -1,4 +1,5 @@
 from datetime import datetime
+import uuid
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -18,9 +19,9 @@ class RevisionUpdate(BaseModel):
 class RevisionResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    id: str
-    document_version_id: str
-    reviewer_id: str
+    id: str | uuid.UUID
+    document_version_id: str | uuid.UUID
+    reviewer_id: str | uuid.UUID
     note: str
     status: str
     created_at: datetime | None = None

@@ -1,4 +1,5 @@
 from datetime import datetime
+import uuid
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -14,9 +15,9 @@ class ReviewRequestCreate(BaseModel):
 class ReviewRequestResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    id: str
-    document_id: str
-    reviewer_id: str
+    id: str | uuid.UUID
+    document_id: str | uuid.UUID
+    reviewer_id: str | uuid.UUID
     status: ReviewStatusEnum
     created_at: datetime | None = None
 

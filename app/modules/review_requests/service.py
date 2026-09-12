@@ -1,3 +1,4 @@
+import uuid
 from fastapi import HTTPException, status
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -6,6 +7,7 @@ import structlog
 from app.database.models import (
     Document,
     DocumentReviewer,
+    DocumentStatusEnum,
     ReviewRequest,
     ReviewStatusEnum,
     WorkspaceUser,
@@ -29,7 +31,7 @@ def _to_response(req: ReviewRequest) -> ReviewRequestResponse:
 
 
 async def _ensure_reviewer_is_member(
-    db: AsyncSession, workspace_id: str, reviewer_id: str
+    db: AsyncSession, workspace_id: str, reviewer_id: str | uuid.UUID
 ) -> None:
     stmt = select(WorkspaceUser).where(
         WorkspaceUser.workspace_id == workspace_id,
@@ -86,9 +88,6 @@ async def create_review_request(
     )
     db.add(req)
 
-    if document.status == "draft":
-        document.status = "pending_review"
-
     await db.commit()
     await db.refresh(req)
     logger.info(
@@ -122,7 +121,7 @@ async def list_review_requests(
 
 
 async def get_review_request(
-    db: AsyncSession, request_id: str, document_id: str
+    db: AsyncSession, request_id: str, document_id: str | uuid.UUID
 ) -> ReviewRequest:
     """Detail satu review request. 404 jika tidak milik document ini."""
     stmt = select(ReviewRequest).where(
@@ -153,15 +152,13 @@ async def cancel_review_request(
         )
     await db.delete(req)
 
-    # Jika tidak ada lagi pending, kembalikan status dokumen ke draft.
     stmt = select(ReviewRequest).where(
         ReviewRequest.document_id == document.id,
         ReviewRequest.status == ReviewStatusEnum.PENDING,
         ReviewRequest.id != req.id,
     )
     remaining = (await db.execute(stmt)).scalars().all()
-    if not remaining and document.status == "pending_review":
-        document.status = "draft"
+    document.status = DocumentStatusEnum.PENDING
 
     await db.commit()
     logger.info("cancel_review_request_success", request_id=req.id)
@@ -199,7 +196,7 @@ async def accept_review_request(
         is_mentor=True,
     )
     db.add(mentor)
-    document.status = "approved"
+    document.status = DocumentStatusEnum.ACCEPTED
 
     await db.commit()
     await db.refresh(req)
@@ -212,7 +209,7 @@ async def accept_review_request(
 
 
 async def reject_review_request(
-    db: AsyncSession, req: ReviewRequest, reviewer_id: str
+    db: AsyncSession, req: ReviewRequest, reviewer_id: str | uuid.UUID
 ) -> ReviewRequestResponse:
     """Reviewer menolak. Hanya reviewer bersangkutan, hanya pending. Tanpa insert reviewer."""
     if str(req.reviewer_id) != str(reviewer_id):

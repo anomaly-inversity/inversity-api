@@ -1,4 +1,5 @@
 from datetime import datetime
+import uuid
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 from app.database.models import RoleEnum
@@ -27,7 +28,7 @@ class UserWorkspaceResponse(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
-    id: str
+    id: str | uuid.UUID
     name: str
     email: str
     role: RoleEnum
