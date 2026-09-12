@@ -50,7 +50,7 @@ async def _generate_unique_invite_code(db: AsyncSession) -> str:
 
 
 async def list_user_workspaces(
-    db: AsyncSession, user_id: int, skip: int = 0, limit: int = 100
+    db: AsyncSession, user_id: str, skip: int = 0, limit: int = 100
 ) -> tuple[list[WorkspaceResponse], int]:
     """List semua workspace di mana user adalah member."""
     count_stmt = (
@@ -90,7 +90,7 @@ async def list_user_workspaces(
 
 
 async def get_workspace_detail(
-    db: AsyncSession, workspace_id: int, user_id: int
+    db: AsyncSession, workspace_id: int, user_id: str
 ) -> WorkspaceResponse:
     """Detail satu workspace. 404 jika workspace tidak ada atau user bukan member."""
     stmt = (
@@ -116,7 +116,7 @@ async def get_workspace_detail(
 
 
 async def create_workspace(
-    db: AsyncSession, user_id: int, payload: WorkspaceCreate
+    db: AsyncSession, user_id: str, payload: WorkspaceCreate
 ) -> WorkspaceResponse:
     """Buat workspace baru. Creator otomatis jadi ADMIN."""
     logger.info("create_workspace_attempt", user_id=user_id, name=payload.name)
@@ -143,7 +143,7 @@ async def create_workspace(
 
 
 async def update_workspace(
-    db: AsyncSession, workspace_id: int, user_id: int, payload: WorkspaceUpdate
+    db: AsyncSession, workspace_id: int, user_id: str, payload: WorkspaceUpdate
 ) -> WorkspaceResponse:
     """Update nama workspace. Caller (router) sudah memastikan ADMIN."""
     stmt = select(Workspace).where(Workspace.id == workspace_id)

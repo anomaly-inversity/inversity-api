@@ -1,10 +1,13 @@
+import asyncio
 import logging
 import uvicorn
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
 from scalar_fastapi import get_scalar_api_reference
 
+from app.core import logger
 from app.core.redis import redis_client
+from app.database.session import Base, engine
 from app.modules.auth.router import router as auth_router
 from app.modules.users.router import router as users_router
 from app.modules.workspaces.router import router as workspaces_router
@@ -45,7 +48,16 @@ def hello_world():
     }
 
 
+async def auto_migrate():
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+
+    await engine.dispose()
+    logger.info("database migrated successfully")
+
+
 if __name__ == "__main__":
+    asyncio.run(auto_migrate())
     uvicorn.run(
         "main:app",
         host="0.0.0.0",

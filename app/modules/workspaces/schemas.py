@@ -22,10 +22,10 @@ class WorkspaceResponse(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
-    id: int
+    id: str
     name: str
     invite_code: str | None = None
-    created_by: int | None = None
+    created_by: str | None = None
     created_at: datetime | None = None
     role: RoleEnum
     member_count: int = 0

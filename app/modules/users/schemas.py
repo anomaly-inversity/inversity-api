@@ -27,7 +27,7 @@ class UserWorkspaceResponse(BaseModel):
 
     model_config = ConfigDict(from_attributes=True)
 
-    id: int
+    id: str
     name: str
     email: str
     role: RoleEnum
