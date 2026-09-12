@@ -155,7 +155,9 @@ async def update_document(
 
 async def delete_document(db: AsyncSession, document: Document) -> None:
     """Hapus document (owner only). Review request terkait ikut terhapus via cascade manual."""
-    from app.database.models import ReviewRequest
+    from datetime import datetime, timezone
+
+    from app.database.models import DocumentVersion, ReviewRequest
 
     await db.execute(
         delete(ReviewRequest).where(ReviewRequest.document_id == document.id)
@@ -163,6 +165,15 @@ async def delete_document(db: AsyncSession, document: Document) -> None:
     await db.execute(
         delete(DocumentReviewer).where(DocumentReviewer.document_id == document.id)
     )
+    # Soft-delete versions agar revisions tetap ada di database (tidak orphan FK).
+    versions_stmt = select(DocumentVersion).where(
+        DocumentVersion.document_id == document.id,
+        DocumentVersion.deleted_at.is_(None),
+    )
+    versions = (await db.execute(versions_stmt)).scalars().all()
+    now = datetime.now(timezone.utc)
+    for version in versions:
+        version.deleted_at = now
     await db.delete(document)
     await db.commit()
     logger.info("delete_document_success", document_id=document.id)
