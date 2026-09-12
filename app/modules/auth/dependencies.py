@@ -1,5 +1,6 @@
+from typing import Annotated
 from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 import jwt
@@ -11,13 +12,15 @@ from app.database.models import User
 from app.core.config import settings
 from app.core.redis import redis_client
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
+http_bearer = HTTPBearer()
 
 
 async def get_current_user(
-    token: str = Depends(oauth2_scheme), db: AsyncSession = Depends(get_db)
+    credentials: Annotated[HTTPAuthorizationCredentials, Depends(http_bearer)],
+    db: AsyncSession = Depends(get_db),
 ) -> User:
     try:
+        token = credentials.credentials
         payload = jwt.decode(
             token, settings.AUTH_SECRET_KEY, algorithms=[settings.AUTH_ALGORITHM]
         )

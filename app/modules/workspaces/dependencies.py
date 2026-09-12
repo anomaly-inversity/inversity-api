@@ -11,7 +11,7 @@ logger = structlog.get_logger()
 
 
 async def require_workspace_member(
-    workspace_id: int,
+    workspace_id: str,
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ) -> tuple[Workspace, WorkspaceUser]:
@@ -44,7 +44,7 @@ async def require_workspace_member(
 
 
 async def require_workspace_admin(
-    workspace_id: int,
+    workspace_id: str,
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ) -> tuple[Workspace, WorkspaceUser]:

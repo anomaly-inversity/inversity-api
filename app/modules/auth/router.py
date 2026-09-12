@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, status, Request
+from fastapi.security import HTTPAuthorizationCredentials
 from sqlalchemy.ext.asyncio import AsyncSession
-from typing import Optional
+from typing import Annotated, Optional
 
 from app.database.session import get_db
 from app.database.models import User
@@ -14,7 +15,7 @@ from app.modules.auth.schemas import (
     UserResponse,
 )
 from app.modules.auth import service
-from app.modules.auth.dependencies import get_current_user, oauth2_scheme
+from app.modules.auth.dependencies import get_current_user, http_bearer
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
 
@@ -53,10 +54,11 @@ async def get_profile(current_user: User = Depends(get_current_user)):
 
 @router.post("/logout")
 async def logout(
+    credentials: Annotated[HTTPAuthorizationCredentials, Depends(http_bearer)],
     request_data: Optional[RefreshTokenRequest] = None,
     current_user: User = Depends(get_current_user),
-    token: str = Depends(oauth2_scheme),
 ):
+    token = credentials.credentials
     refresh_token = request_data.refresh_token if request_data else None
     await service.logout_user(current_user, token, refresh_token)
     return {"message": "Successfully logged out"}
