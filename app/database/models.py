@@ -2,7 +2,7 @@ import enum
 import uuid
 from datetime import datetime
 from typing import List, Optional
-from sqlalchemy import String, ForeignKey, DateTime, Float, Text, Enum
+from sqlalchemy import Integer, String, ForeignKey, DateTime, Float, Text, Enum, Uuid
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql import func
 from app.database.session import Base
@@ -33,8 +33,8 @@ class SenderTypeEnum(str, enum.Enum):
 class User(Base):
     __tablename__ = "users"
 
-    id: Mapped[str] = mapped_column(
-        String, primary_key=True, index=True, default=lambda: str(uuid.uuid4())
+    id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, primary_key=True, index=True, default=lambda: str(uuid.uuid4())
     )
     email: Mapped[str] = mapped_column(String, unique=True, index=True, nullable=False)
     password_hash: Mapped[str] = mapped_column(String, nullable=False)
@@ -47,12 +47,14 @@ class User(Base):
 class Workspace(Base):
     __tablename__ = "workspaces"
 
-    id: Mapped[str] = mapped_column(
-        String, primary_key=True, index=True, default=lambda: str(uuid.uuid4())
+    id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, primary_key=True, index=True, default=lambda: str(uuid.uuid4())
     )
     name: Mapped[str] = mapped_column(String, nullable=False)
     invite_code: Mapped[Optional[str]] = mapped_column(String, unique=True, index=True)
-    created_by: Mapped[Optional[str]] = mapped_column(String, ForeignKey("users.id"))
+    created_by: Mapped[Optional[uuid.UUID]] = mapped_column(
+        Uuid, ForeignKey("users.id")
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )
@@ -63,13 +65,15 @@ class Workspace(Base):
 class WorkspaceUser(Base):
     __tablename__ = "workspace_users"
 
-    id: Mapped[str] = mapped_column(
-        String, primary_key=True, index=True, default=lambda: str(uuid.uuid4())
+    id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, primary_key=True, index=True, default=lambda: str(uuid.uuid4())
     )
-    workspace_id: Mapped[str] = mapped_column(
-        String, ForeignKey("workspaces.id"), nullable=False
+    workspace_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, ForeignKey("workspaces.id"), nullable=False
     )
-    user_id: Mapped[str] = mapped_column(String, ForeignKey("users.id"), nullable=False)
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, ForeignKey("users.id"), nullable=False
+    )
     role: Mapped[RoleEnum] = mapped_column(
         Enum(RoleEnum), default=RoleEnum.USER, nullable=False
     )
@@ -84,15 +88,17 @@ class WorkspaceUser(Base):
 class Document(Base):
     __tablename__ = "documents"
 
-    id: Mapped[str] = mapped_column(
-        String, primary_key=True, index=True, default=lambda: str(uuid.uuid4())
+    id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, primary_key=True, index=True, default=lambda: str(uuid.uuid4())
     )
-    workspace_id: Mapped[str] = mapped_column(
-        String, ForeignKey("workspaces.id"), nullable=False
+    workspace_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, ForeignKey("workspaces.id"), nullable=False
     )
-    user_id: Mapped[str] = mapped_column(String, ForeignKey("users.id"), nullable=False)
-    assigned_reviewer_id: Mapped[Optional[str]] = mapped_column(
-        String, ForeignKey("users.id"), nullable=True
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, ForeignKey("users.id"), nullable=False
+    )
+    assigned_reviewer_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+        Uuid, ForeignKey("users.id"), nullable=True
     )
     title: Mapped[str] = mapped_column(String, nullable=False)
     status: Mapped[str] = mapped_column(String, nullable=False)
@@ -113,11 +119,11 @@ class Document(Base):
 class DocumentVersion(Base):
     __tablename__ = "document_versions"
 
-    id: Mapped[str] = mapped_column(
-        String, primary_key=True, index=True, default=lambda: str(uuid.uuid4())
+    id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, primary_key=True, index=True, default=lambda: str(uuid.uuid4())
     )
-    document_id: Mapped[str] = mapped_column(
-        String, ForeignKey("documents.id"), nullable=False
+    document_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, ForeignKey("documents.id"), nullable=False
     )
     file_url: Mapped[str] = mapped_column(String, nullable=False)
     version_number: Mapped[int] = mapped_column(nullable=False)
@@ -133,14 +139,14 @@ class DocumentVersion(Base):
 class ReviewRequest(Base):
     __tablename__ = "review_requests"
 
-    id: Mapped[str] = mapped_column(
-        String, primary_key=True, index=True, default=lambda: str(uuid.uuid4())
+    id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, primary_key=True, index=True, default=lambda: str(uuid.uuid4())
     )
-    document_id: Mapped[str] = mapped_column(
-        String, ForeignKey("documents.id"), nullable=False
+    document_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, ForeignKey("documents.id"), nullable=False
     )
-    reviewer_id: Mapped[str] = mapped_column(
-        String, ForeignKey("users.id"), nullable=False
+    reviewer_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, ForeignKey("users.id"), nullable=False
     )
     status: Mapped[ReviewStatusEnum] = mapped_column(
         Enum(ReviewStatusEnum), default=ReviewStatusEnum.PENDING, nullable=False
@@ -156,14 +162,14 @@ class ReviewRequest(Base):
 class Revision(Base):
     __tablename__ = "revisions"
 
-    id: Mapped[str] = mapped_column(
-        String, primary_key=True, index=True, default=lambda: str(uuid.uuid4())
+    id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, primary_key=True, index=True, default=lambda: str(uuid.uuid4())
     )
-    document_version_id: Mapped[str] = mapped_column(
-        String, ForeignKey("document_versions.id"), nullable=False
+    document_version_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, ForeignKey("document_versions.id"), nullable=False
     )
-    reviewer_id: Mapped[str] = mapped_column(
-        String, ForeignKey("users.id"), nullable=False
+    reviewer_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, ForeignKey("users.id"), nullable=False
     )
     note: Mapped[str] = mapped_column(Text, nullable=False)
     status: Mapped[RevisionStatusEnum] = mapped_column(
@@ -180,13 +186,15 @@ class Revision(Base):
 class ChatSession(Base):
     __tablename__ = "chat_sessions"
 
-    id: Mapped[str] = mapped_column(
-        String, primary_key=True, index=True, default=lambda: str(uuid.uuid4())
+    id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, primary_key=True, index=True, default=lambda: str(uuid.uuid4())
     )
-    document_id: Mapped[str] = mapped_column(
-        String, ForeignKey("documents.id"), nullable=False
+    document_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, ForeignKey("documents.id"), nullable=False
     )
-    user_id: Mapped[str] = mapped_column(String, ForeignKey("users.id"), nullable=False)
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, ForeignKey("users.id"), nullable=False
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )
@@ -198,11 +206,11 @@ class ChatSession(Base):
 class ChatMessage(Base):
     __tablename__ = "chat_messages"
 
-    id: Mapped[str] = mapped_column(
-        String, primary_key=True, index=True, default=lambda: str(uuid.uuid4())
+    id: Mapped[int] = mapped_column(
+        Integer, primary_key=True, index=True, autoincrement=True
     )
-    session_id: Mapped[str] = mapped_column(
-        String, ForeignKey("chat_sessions.id"), nullable=False
+    session_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid, ForeignKey("chat_sessions.id"), nullable=False
     )
     sender_type: Mapped[SenderTypeEnum] = mapped_column(
         Enum(SenderTypeEnum), nullable=False

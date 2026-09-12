@@ -16,7 +16,7 @@ logger = structlog.get_logger()
 
 def _to_response(user: User, membership: WorkspaceUser) -> UserWorkspaceResponse:
     return UserWorkspaceResponse(
-        id=user.id,
+        id=str(user.id),
         name=user.name,
         email=user.email,
         role=membership.role,
@@ -157,7 +157,7 @@ async def update_workspace_user(
 
 
 async def delete_workspace_user(
-    db: AsyncSession, workspace_id: int, user_id: int, current_user_id: int
+    db: AsyncSession, workspace_id: int, user_id: str, current_user_id: str
 ) -> None:
     """Remove membership: hapus baris workspace_users, data users tetap ada."""
     if user_id == current_user_id:

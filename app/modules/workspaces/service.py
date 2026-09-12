@@ -19,10 +19,10 @@ def _to_response(
     workspace: Workspace, membership: WorkspaceUser, member_count: int
 ) -> WorkspaceResponse:
     return WorkspaceResponse(
-        id=workspace.id,
+        id=str(workspace.id),
         name=workspace.name,
         invite_code=workspace.invite_code,
-        created_by=workspace.created_by,
+        created_by=str(workspace.created_by),
         created_at=workspace.created_at,
         role=membership.role,
         member_count=member_count,
@@ -45,7 +45,6 @@ async def _generate_unique_invite_code(db: AsyncSession) -> str:
         stmt = select(Workspace.id).where(Workspace.invite_code == code)
         if (await db.execute(stmt)).scalar_one_or_none() is None:
             return code
-    # Fallback: kode lebih panjang agar collision praktis mustahil.
     return secrets.token_urlsafe(16)
 
 
@@ -164,7 +163,6 @@ async def update_workspace(
     )
     result = await db.execute(stmt)
     membership = result.scalar_one_or_none()
-    # Seharusnya tidak terjadi karena router sudah cek admin, tapi tetap aman.
     if membership is None:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Workspace not found"

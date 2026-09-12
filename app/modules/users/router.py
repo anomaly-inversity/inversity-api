@@ -21,8 +21,8 @@ async def list_users(
     workspace_id: int = Query(gt=0),
     skip: int = Query(default=0, ge=0),
     limit: int = Query(default=100, ge=1, le=500),
-    db: AsyncSession = Depends(get_db),  # noqa: B008
-    _workspace: Workspace = Depends(require_workspace_admin),  # noqa: B008
+    db: AsyncSession = Depends(get_db),
+    _workspace: Workspace = Depends(require_workspace_admin),
 ) -> UserListResponse:
     """Get list user dari workspace yang sama (admin only)."""
     users, total = await service.list_workspace_users(db, workspace_id, skip, limit)
@@ -33,8 +33,8 @@ async def list_users(
 async def get_user_detail(
     user_id: int,
     workspace_id: int = Query(gt=0),
-    db: AsyncSession = Depends(get_db),  # noqa: B008
-    _workspace: Workspace = Depends(require_workspace_admin),  # noqa: B008
+    db: AsyncSession = Depends(get_db),
+    _workspace: Workspace = Depends(require_workspace_admin),
 ) -> UserWorkspaceResponse:
     """Get detail satu user dalam workspace yang sama (admin only)."""
     return await service.get_workspace_user_detail(db, workspace_id, user_id)
@@ -46,8 +46,8 @@ async def get_user_detail(
 async def create_user(
     payload: UserCreateByAdmin,
     workspace_id: int = Query(gt=0),
-    db: AsyncSession = Depends(get_db),  # noqa: B008
-    _workspace: Workspace = Depends(require_workspace_admin),  # noqa: B008
+    db: AsyncSession = Depends(get_db),
+    _workspace: Workspace = Depends(require_workspace_admin),
 ) -> UserWorkspaceResponse:
     """Admin registrasi user baru langsung ke workspace-nya."""
     return await service.create_workspace_user(db, workspace_id, payload)
@@ -58,8 +58,8 @@ async def update_user(
     user_id: int,
     payload: UserUpdateByAdmin,
     workspace_id: int = Query(gt=0),
-    db: AsyncSession = Depends(get_db),  # noqa: B008
-    _workspace: Workspace = Depends(require_workspace_admin),  # noqa: B008
+    db: AsyncSession = Depends(get_db),
+    _workspace: Workspace = Depends(require_workspace_admin),
 ) -> UserWorkspaceResponse:
     """Admin update user dalam workspace yang sama."""
     return await service.update_workspace_user(db, workspace_id, user_id, payload)
@@ -67,12 +67,12 @@ async def update_user(
 
 @router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_user(
-    user_id: int,
+    user_id: str,
     workspace_id: int = Query(gt=0),
-    db: AsyncSession = Depends(get_db),  # noqa: B008
-    _workspace: Workspace = Depends(require_workspace_admin),  # noqa: B008
-    current_user: User = Depends(get_current_user),  # noqa: B008
+    db: AsyncSession = Depends(get_db),
+    _workspace: Workspace = Depends(require_workspace_admin),
+    current_user: User = Depends(get_current_user),
 ) -> None:
     """Admin hapus user dari workspace (remove membership, data user tetap ada)."""
-    await service.delete_workspace_user(db, workspace_id, user_id, current_user.id)
+    await service.delete_workspace_user(db, workspace_id, user_id, str(current_user.id))
     return None

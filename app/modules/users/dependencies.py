@@ -12,8 +12,8 @@ logger = structlog.get_logger()
 
 async def require_workspace_admin(
     workspace_id: int,
-    current_user: User = Depends(get_current_user),  # noqa: B008
-    db: AsyncSession = Depends(get_db),  # noqa: B008
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
 ) -> Workspace:
     """Pastikan workspace ada dan current_user adalah ADMIN di workspace itu."""
     stmt = select(Workspace).where(Workspace.id == workspace_id)
