@@ -1,3 +1,4 @@
+import logging
 import uvicorn
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
@@ -7,6 +8,7 @@ from app.core.redis import redis_client
 from app.modules.auth.router import router as auth_router
 from app.core.logger import setup_logging
 from app.core.middleware import LoggingMiddleware
+from app.core.config import settings
 
 setup_logging(pretty=False)
 
@@ -40,4 +42,10 @@ def hello_world():
 
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="0.0.0.0", port=5000, reload=True)
+    uvicorn.run(
+        "main:app",
+        host="0.0.0.0",
+        port=settings.PORT,
+        reload=True,
+        log_level=logging.ERROR,
+    )

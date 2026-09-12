@@ -19,7 +19,7 @@ async def get_current_user(
 ) -> User:
     try:
         payload = jwt.decode(
-            token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
+            token, settings.AUTH_SECRET_KEY, algorithms=[settings.AUTH_ALGORITHM]
         )
         if payload is None:
             raise HTTPException(

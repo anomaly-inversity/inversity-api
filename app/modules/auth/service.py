@@ -71,7 +71,7 @@ async def login_user(db: AsyncSession, user_in: UserLogin):
     if redis_client.redis is not None:
         await redis_client.redis.setex(
             f"refresh_token:{user.id}:{refresh_token}",
-            timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS),
+            timedelta(days=settings.AUTH_REFRESH_TOKEN_EXPIRE_DAYS),
             "valid",
         )
 
@@ -87,7 +87,7 @@ async def refresh_user_token(refresh_token: str):
     logger.info("refresh_token_attempt")
     try:
         payload = jwt.decode(
-            refresh_token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
+            refresh_token, settings.AUTH_SECRET_KEY, algorithms=[settings.AUTH_ALGORITHM]
         )
         user_id = payload.get("sub")
         if user_id is None:
@@ -116,7 +116,7 @@ async def refresh_user_token(refresh_token: str):
         await redis_client.redis.delete(f"refresh_token:{user_id}:{refresh_token}")
         await redis_client.redis.setex(
             f"refresh_token:{user_id}:{new_refresh_token}",
-            timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS),
+            timedelta(days=settings.AUTH_REFRESH_TOKEN_EXPIRE_DAYS),
             "valid",
         )
 
@@ -132,7 +132,7 @@ async def logout_user(user: User, token: str, refresh_token: str | None = None):
     logger.info("logout_user_attempt", user_id=user.id)
     try:
         payload = jwt.decode(
-            token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM]
+            token, settings.AUTH_SECRET_KEY, algorithms=[settings.AUTH_ALGORITHM]
         )
         exp = payload.get("exp")
         if exp:
